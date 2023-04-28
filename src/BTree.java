@@ -22,7 +22,7 @@ public class BTree implements Definitions{
     public void split(No folha, No pai){
         No cx1 = new No();
         No cx2 = new No();
-
+        int pos;
         //realiza o split do vetor info, obtendo o inicio até a raiz, jogando em um vetor auxiliar tamanho N
         for(int i=0; i<N; i++){
             cx1.setvInfo(i,folha.getvInfo(i));
@@ -50,7 +50,19 @@ public class BTree implements Definitions{
 
             folha.setTl(1);
         }else{
+            pos = pai.procurarPosicao(folha.getvInfo(N));
+            pai.remanejar(pos);
+            pai.setvInfo(pos, folha.getvInfo(N));
+            pai.setvPos(pos, folha.getvPos(N));
+            pai.setTl(pai.getTl()+1);
+            pai.setvLig(pos, cx1);
+            pai.setvLig(pos+1, cx2);
 
+            if(pai.getTl()>N*2){//verifica se o pai passou do limite do Vetor, dando split nele se necessario
+                folha = pai;
+                pai = localizaPai(folha,folha.getvInfo(N));
+                split(folha, pai);
+            }
         }
     }
 
