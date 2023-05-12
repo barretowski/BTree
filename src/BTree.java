@@ -111,29 +111,50 @@ public class BTree implements Definitions{
                     folha = subD;;
                     pos = 0;
                 }
-            }else{
+            }else
                 folha = no;
-                //remover da folha
-                folha.remanejarEx(pos);
-                folha.setTl(folha.getTl()-1);
 
-                if(folha!=raiz && folha.getTl()<N){
-                    redistr_concat(folha);
-                }
+            //remover da folha
+            folha.remanejarExclusao(pos);
+            folha.setTl(folha.getTl()-1);
+
+            if(folha==raiz && folha.getTl()==0)
+                raiz = null;
+            else if(folha!=raiz && folha.getTl()<N){
+                redistr_concat(folha);
             }
+
         }
     }
 
-    private No localizarSubD(No no, int pos) {
-        return raiz;
+    private No localizarSubE(No no, int pos)
+    {
+        no=no.getvLig(pos);
+        while(no.getvLig(0)!=null)
+            no=no.getvLig(no.getTl());
+        return no;
     }
 
-    private No localizarSubE(No no, int pos) {
-        return raiz;
+    private No localizarSubD(No no, int pos)
+    {
+        no=no.getvLig(pos);
+        while(no.getvLig(0)!=null)
+            no=no.getvLig(0);
+        return no;
     }
 
     private No localizaNo(int info) {
-        return raiz;
+        No no = raiz;
+        boolean achou = false;
+        int pos;
+        while(no!=null && !achou){
+            pos = no.procurarPosicao(info);
+            if(pos<no.getTl() && no.getvInfo(pos)==info)
+                achou = true;
+            else
+                no = no.getvLig(pos);
+        }
+        return no;
     }
 
     public void redistr_concat(No folha){
@@ -150,26 +171,61 @@ public class BTree implements Definitions{
         else
             irmaD = null;
 
-        if(irmaD!=null && irmaE.getTl()>N){//redistribuição com a irmã da esquerda
-
+        if(irmaE!=null && irmaE.getTl()>N){//redistribuição com a irmã da esquerda
+            folha.remanejar(0);
+            folha.setvInfo(0, pai.getvInfo(posPai-1));
+            folha.setvPos(0, pai.getvPos(posPai-1));
+            folha.setTl(folha.getTl()+1);
+            pai.setvInfo(posPai-1,irmaE.getvInfo(irmaE.getTl()-1));
+            //continua...
         }else if(irmaD!=null && irmaD.getTl()>N){//redistribuição com a irmã da direita
 
         }else{//concatenação
             if(irmaE!=null){//concatenação com a irmã da esquerda
+                //desce o pai e concatena com a irmã da esquerda...
+                irmaE.setvInfo(irmaE.getTl(), pai.getvInfo(posPai-1));
+                irmaE.setvPos(irmaE.getTl(), pai.getvPos(posPai-1));
+                irmaE.setTl(irmaE.getTl()+1);
+
+                //exclui a antiga posição do pai
+                pai.remanejarExclusao(posPai-1);
+                pai.setTl(pai.getTl()-1);
+
+                //percorre toda a folha da direita para trazer os elementos restantes para a irma da esquerda
+                for(int i=0; i<folha.getTl(); i++){
+                    irmaE.setvInfo(irmaE.getTl(), folha.getvInfo(i));
+                    irmaE.setvPos(irmaE.getTl(), folha.getvInfo(i));
+
+                    //pega as ligações
+                    irmaE.setvLig(irmaE.getTl(), folha.getvLig(i));
+                    irmaE.setTl(irmaE.getTl()+1);
+                }
+                irmaE.setvLig(irmaE.getTl(), folha.getvLig(folha.getTl()));
+                pai.setvLig(posPai-1, irmaE);
 
             }else{//concatenação com a irmã da direita
+                //desce o pai e concatena com a irma da direita
+                irmaD.setvInfo(irmaD.getTl(), pai.getvInfo(posPai+1));
+                irmaD.setvPos(irmaD.getTl(), pai.getvInfo(posPai+1));
+                irmaD.setTl(irmaD.getTl()+1);
 
+                //exclui a antiga posicao do pai
+                pai.remanejarExclusao(posPai+1);
+                pai.setTl(pai.getTl()+1);
+
+                //percorre a folha da esquerda e insere na irma da direita
+                for(int i=0; i<folha.getTl();i++){
+
+                }
             }
-
-            folha = pai;
-            if(folha.getTl()==0){
+            if(pai==raiz && folha.getTl()==0){
                 if(irmaE!=null)
                     raiz = irmaE;
                 else
                     raiz = irmaD;
-            }else{
-                if(folha.getTl()<N)
-                    redistr_concat(folha);
+            }else if(folha.getTl()<N){
+                folha = pai;
+                redistr_concat(folha);
             }
         }
 
