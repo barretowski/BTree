@@ -52,4 +52,7 @@ public class No implements Definitions{
     public void remanejar(int pos){
 
     }
+
+    public void remanejarEx(int pos) {
+    }
 }

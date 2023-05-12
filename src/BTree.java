@@ -11,7 +11,13 @@ public class BTree implements Definitions{
 
     //metodo para retornar endereço da folha;
     public No navegarAteFolha(int info){
-        return raiz;
+        No folha=raiz;
+        int pos;
+        while(folha.getvLig(0)!=null){
+            pos = folha.procurarPosicao(info);//procura a melhor posição atual
+            folha = folha.getvLig(pos);
+        }
+        return folha;
     }
 
     //metodo para buscar o pai do elemento informado
@@ -85,4 +91,90 @@ public class BTree implements Definitions{
             }
         }
     }
+    public void excluir(int info){
+        No no = localizaNo(info);
+        No subE, subD, folha;
+        int pos;
+        if(no!=null){
+            pos = no.procurarPosicao(info);
+            if(no.getvLig(0)!=null){ // não é folha
+                subE=localizarSubE(no, pos);
+                subD=localizarSubD(no, pos);
+                if(subE.getTl()>N && subD.getTl()<=N){//sub da esquerda
+                    no.setvInfo(pos, subE.getvInfo(subE.getTl()-1));
+                    no.setvPos(pos,subE.getvPos(subE.getTl()-1));
+                    folha = subE;
+                    pos = subE.getTl()-1;
+                }else{//sub da direita
+                    no.setvInfo(pos, subD.getvInfo(0));
+                    no.setvPos(pos, subD.getvPos(0));
+                    folha = subD;;
+                    pos = 0;
+                }
+            }else{
+                folha = no;
+                //remover da folha
+                folha.remanejarEx(pos);
+                folha.setTl(folha.getTl()-1);
+
+                if(folha!=raiz && folha.getTl()<N){
+                    redistr_concat(folha);
+                }
+            }
+        }
+    }
+
+    private No localizarSubD(No no, int pos) {
+        return raiz;
+    }
+
+    private No localizarSubE(No no, int pos) {
+        return raiz;
+    }
+
+    private No localizaNo(int info) {
+        return raiz;
+    }
+
+    public void redistr_concat(No folha){
+        No pai = localizaPai(folha, folha.getvInfo(0));
+        int posPai = pai.procurarPosicao(folha.getvInfo(0));
+        No irmaE, irmaD;
+        if(posPai>0)
+            irmaE = pai.getvLig(posPai-1);
+        else
+            irmaE = null;
+
+        if(posPai<pai.getTl())
+            irmaD = pai.getvLig(posPai+1);
+        else
+            irmaD = null;
+
+        if(irmaD!=null && irmaE.getTl()>N){//redistribuição com a irmã da esquerda
+
+        }else if(irmaD!=null && irmaD.getTl()>N){//redistribuição com a irmã da direita
+
+        }else{//concatenação
+            if(irmaE!=null){//concatenação com a irmã da esquerda
+
+            }else{//concatenação com a irmã da direita
+
+            }
+
+            folha = pai;
+            if(folha.getTl()==0){
+                if(irmaE!=null)
+                    raiz = irmaE;
+                else
+                    raiz = irmaD;
+            }else{
+                if(folha.getTl()<N)
+                    redistr_concat(folha);
+            }
+        }
+
+
+
+    }
+
 }
