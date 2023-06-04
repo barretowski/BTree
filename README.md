@@ -2,7 +2,10 @@
 
 ![image](https://github.com/barretowski/BTree/assets/69700545/b242c8bf-4524-46c1-b68b-816bd0b50e0c)
 
-Exclusão BTree
+# Inserção
+![image](https://github.com/barretowski/BTree/assets/69700545/a68d41ed-1cb1-41e3-8ae8-e22e86412ca2)
+
+# Exclusão BTree
 
 -> 1º Caso: O elemento está em um nó, sendo assim só remove-lo e dps remanejar ao contrario.
 -> 2º Caso: O elemento está em um "pai", então é necessario localizar um substituto
