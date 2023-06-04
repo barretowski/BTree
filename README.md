@@ -1,5 +1,7 @@
 # BTree
 
+![image](https://github.com/barretowski/BTree/assets/69700545/b242c8bf-4524-46c1-b68b-816bd0b50e0c)
+
 Exclusão BTree
 
 -> 1º Caso: O elemento está em um nó, sendo assim só remove-lo e dps remanejar ao contrario.
