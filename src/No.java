@@ -11,7 +11,13 @@ public class No implements Definitions{
         this.vLig = new No[N*2+2];
     };
     public No(int info, int posArq){
-        this.vInfo[posArq] = info;
+        vInfo = new int[2*N+1];
+        vPos = new int[2*N+1];
+        vLig = new No[2*N+2];
+
+        vInfo[0] = info;
+        vPos[0] = posArq;
+        tl = 1;
     }
     public int getvInfo(int p) {
         return vInfo[p];
@@ -46,13 +52,29 @@ public class No implements Definitions{
     }
 
     public int procurarPosicao(int info){
-        return 1;
+        //busca melhor posição para inserção dentro do vetor
+        int i=0;
+        while(i<tl && info > vInfo[i]){
+            i++;
+        }
+
+        return i;
     }
 
     public void remanejar(int pos){
-
+        vLig[tl+1] = vLig[tl];
+        for(int i = tl; i>pos; i--){
+            vInfo[i] = vInfo[i-1];
+            vPos[i] = vPos[i-1];
+            vLig[i] = vLig[i-1];
+        }
     }
 
-    public void remanejarEx(int pos) {
+    public void remanejarExclusao(int pos) {
+        for(int i=pos; i<tl-1; i++){
+            vInfo[i] = vInfo[i+1];
+            vPos[i] = vPos[i+1];
+            vLig[i] = vLig[i+1];
+        }
     }
 }

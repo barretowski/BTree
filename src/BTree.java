@@ -22,7 +22,19 @@ public class BTree implements Definitions{
 
     //metodo para buscar o pai do elemento informado
     public No localizaPai(No folha, int info){
-        return raiz;
+        No aux, pai;
+        int i ;
+        aux = raiz;
+        pai = aux;
+        while(aux!=folha && aux!=null){
+            i=0;
+            while(i<aux.getTl() && info>aux.getvInfo(i)){
+                i++;
+            }
+            pai = aux;
+            aux = aux.getvLig(i);
+        }
+        return pai;
     }
 
     public void split(No folha, No pai){
@@ -91,6 +103,36 @@ public class BTree implements Definitions{
             }
         }
     }
+    private No localizarSubE(No no, int pos)
+    {
+        no=no.getvLig(pos);
+        while(no.getvLig(0)!=null)
+            no=no.getvLig(no.getTl());
+        return no;
+    }
+
+    private No localizarSubD(No no, int pos)
+    {
+        no=no.getvLig(pos);
+        while(no.getvLig(0)!=null)
+            no=no.getvLig(0);
+        return no;
+    }
+
+    private No localizaNo(int info) {
+        No no = raiz;
+        boolean achou = false;
+        int pos;
+        while(no!=null && !achou){
+            pos = no.procurarPosicao(info);
+            if(pos<no.getTl() && no.getvInfo(pos)==info)
+                achou = true;
+            else
+                no = no.getvLig(pos);
+        }
+        return no;
+    }
+
     public void excluir(int info){
         No no = localizaNo(info);
         No subE, subD, folha;
@@ -126,37 +168,6 @@ public class BTree implements Definitions{
 
         }
     }
-
-    private No localizarSubE(No no, int pos)
-    {
-        no=no.getvLig(pos);
-        while(no.getvLig(0)!=null)
-            no=no.getvLig(no.getTl());
-        return no;
-    }
-
-    private No localizarSubD(No no, int pos)
-    {
-        no=no.getvLig(pos);
-        while(no.getvLig(0)!=null)
-            no=no.getvLig(0);
-        return no;
-    }
-
-    private No localizaNo(int info) {
-        No no = raiz;
-        boolean achou = false;
-        int pos;
-        while(no!=null && !achou){
-            pos = no.procurarPosicao(info);
-            if(pos<no.getTl() && no.getvInfo(pos)==info)
-                achou = true;
-            else
-                no = no.getvLig(pos);
-        }
-        return no;
-    }
-
     public void redistr_concat(No folha){
         No pai = localizaPai(folha, folha.getvInfo(0));
         int posPai = pai.procurarPosicao(folha.getvInfo(0));
@@ -177,9 +188,13 @@ public class BTree implements Definitions{
             folha.setvPos(0, pai.getvPos(posPai-1));
             folha.setTl(folha.getTl()+1);
             pai.setvInfo(posPai-1,irmaE.getvInfo(irmaE.getTl()-1));
-            //continua...
         }else if(irmaD!=null && irmaD.getTl()>N){//redistribuição com a irmã da direita
-
+            folha.setvInfo(folha.getTl(), pai.getvInfo(posPai));
+            folha.setvPos(folha.getTl(), pai.getvPos(posPai));
+            folha.setTl(folha.getTl()+1);
+            pai.setvInfo(posPai, irmaD.getvInfo(0));
+            irmaD.remanejar(0);
+            pai.setvLig(posPai + 1, irmaD.getvLig(0));
         }else{//concatenação
             if(irmaE!=null){//concatenação com a irmã da esquerda
                 //desce o pai e concatena com a irmã da esquerda...
@@ -205,26 +220,30 @@ public class BTree implements Definitions{
 
             }else{//concatenação com a irmã da direita
                 //desce o pai e concatena com a irma da direita
-                irmaD.setvInfo(irmaD.getTl(), pai.getvInfo(posPai+1));
-                irmaD.setvPos(irmaD.getTl(), pai.getvInfo(posPai+1));
+                irmaD.remanejar(0);
+                irmaD.setvInfo(0, pai.getvInfo(posPai));
+                irmaD.setvPos(0, pai.getvPos(posPai));
                 irmaD.setTl(irmaD.getTl()+1);
+                pai.remanejarExclusao(posPai);
+                pai.setTl(pai.getTl()-1);
 
-                //exclui a antiga posicao do pai
-                pai.remanejarExclusao(posPai+1);
-                pai.setTl(pai.getTl()+1);
-
+                irmaD.setvLig(0,folha.getvLig(folha.getTl()));
                 //percorre a folha da esquerda e insere na irma da direita
-                for(int i=0; i<folha.getTl();i++){
-
+                for(int i=folha.getTl()-1; i>=0;i--){
+                    irmaD.remanejar(0);
+                    irmaD.setvInfo(0,folha.getvInfo(i));
+                    irmaD.setvPos(0, folha.getvPos(i));
+                    irmaD.setvLig(0,folha.getvLig(i));
+                    irmaD.setTl(irmaD.getTl()+1);
                 }
             }
-            if(pai==raiz && folha.getTl()==0){
+            folha = pai;
+            if(folha.getTl()==0){
                 if(irmaE!=null)
                     raiz = irmaE;
                 else
                     raiz = irmaD;
-            }else if(folha.getTl()<N){
-                folha = pai;
+            }else if(folha!=raiz && folha.getTl()<N){
                 redistr_concat(folha);
             }
         }
@@ -232,5 +251,13 @@ public class BTree implements Definitions{
 
 
     }
-
+    public void in_ordem(No no) {
+        if (no != null) {
+            for (int i = 0; i < no.getTl(); i++) {
+                in_ordem(no.getvLig(i));
+                System.out.print(no.getvInfo(i) + " ");
+            }
+            in_ordem(no.getvLig(no.getTl()));
+        }
+    }
 }
