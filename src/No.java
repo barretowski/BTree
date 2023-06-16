@@ -1,3 +1,5 @@
+//Created by: Paulo Henrique Barreto
+//UNOESTE-FIPP -> RA: 261811215
 public class No implements Definitions{
 
     private int vInfo[];
